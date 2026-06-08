@@ -1,66 +1,33 @@
-# Zone-Based Automatic Speed Controller
+# Zone-Based Automatic Speed Controller 🚗🛡️
 
-## Overview
+An IoT-integrated embedded automotive safety platform designed to automatically govern public vehicle maximum velocities within sensitive geographic locations (e.g., schools, hospitals) through real-time geofenced coordinate calculation.
 
-This project proposes an intelligent vehicle speed management system that automatically regulates vehicle speed based on predefined geographical zones.
+## 📌 Project Architecture
+Operator failure to obey regional speed limitations represents a core component of vehicle accident rates. This system interfaces directly with the vehicle's electronic drivetrain controller to throttle velocity parameters autonomously based on precise physical coordinates, overriding operator acceleration requests when crossing a geofenced safety zone boundary.
 
-The objective is to improve road safety in sensitive locations such as:
+## 📊 Core System Layouts
 
-- Schools
-- Hospitals
-- Residential Areas
-- Accident-Prone Zones
+### Hardware Module Block Diagram
+```mermaid
+graph TD
+    Battery[Lithium-Ion Battery Pack] -->|Power Delivery| ESP32[ESP32 Microcontroller Core MCU]
+    Battery -->|VCC Power Rail| Driver[L298N H-Bridge Motor Driver]
+    GPS[Ublox Neo 6M GPS Module] -->|UART Serial RX/TX| ESP32
+    ESP32 -->|I2C Data Bus Interface| LCD[LCD 1602 Character Display]
+    ESP32 -->|GPIO Output Control| Buzzer[Piezo Buzzer Alert Module]
+    ESP32 -->|PWM Speed Output Duty Cycles| Driver
+    Driver -->|Regulated Motor Voltage| Motor[Geared DC Motors Vehicle Model]
+    ESP32 -.->|Wi-Fi Telemetry Stream| Blynk[Blynk Cloud Infrastructure]
+flowchart TD
+    Start([Power On System]) --> Init[Initialize Peripherals: ESP32, GPS, LCD, Driver]
+    Init --> FetchGPS[Read Serial Data Streams from GPS Receiver]
+    FetchGPS --> CheckLock{Satellite Sync Lock Acquired?}
+    CheckLock -- No --> DispWait[Display 'Searching GPS...' on LCD] --> FetchGPS
+    CheckLock -- Yes --> Compare[Calculate Distance to Stored Zone Boundary Coordinates]
+    Compare --> ZoneCheck{Is Vehicle Inside Restricted Zone Area?}
+    ZoneCheck -- Yes --> TargetSpeed[Retrieve Designated Zone PWM Duty Cycle Constraint]
+    TargetSpeed --> ApplySpeed[Write Safe PWM Limit to L298N Driver] --> Warning[Sound Active Piezo Buzzer Warning]
+    ZoneCheck -- No --> NormalSpeed[Allow Maximum Unrestricted Operator Speed Control]
+    Warning --> PushTelemetry[Upload Real-Time Parameters to Blynk Cloud Mobile App] --> FetchGPS
+    NormalSpeed --> PushTelemetry
 
----
-
-## Problem Statement
-
-Drivers frequently exceed speed limits in restricted areas.
-
-Manual enforcement is difficult and inconsistent.
-
-This system aims to automate compliance through GPS-based location awareness.
-
----
-
-## Proposed Solution
-
-The system continuously tracks vehicle position using GPS.
-
-When the vehicle enters a predefined zone, the controller automatically applies the corresponding speed restriction.
-
----
-
-## Technologies
-
-- Embedded Systems
-- GPS Technology
-- ESP32
-- Arduino IDE
-- IoT Concepts
-
----
-
-## Skills Demonstrated
-
-- System Design
-- Embedded Engineering
-- Electronics Integration
-- GPS-Based Tracking
-- Technical Documentation
-
----
-
-## Future Enhancements
-
-- Cloud Dashboard
-- Mobile Application
-- Live Traffic Integration
-- AI-Based Speed Prediction
-
----
-
-## Author
-
-Ravi Kumar N
-Electronics and Communication Engineering
